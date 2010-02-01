@@ -1,0 +1,141 @@
+<html>
+  <head>
+    <title>utf-n</title>
+    <style type="text/css">
+      body {
+        width: 800px;
+        margin: 0 auto;
+        position: relative;
+      }
+    
+      textarea {
+        width: 100%;
+        padding: 1em;
+        margin: 2em 0;
+        font-size: 1em;
+        height: 350px;
+      }
+      
+      table {
+        font-size: 2em;
+        width: 100%;
+      }
+      
+      td {
+        text-align: center;
+      }
+
+    </style>
+  </head>
+  <body>
+<textarea id="text">
+a few years ago i started wondering: is there a better way to represent text from bits?
+
+ascii doesn't let us represent codepoints higher than 127.
+utf-16 is great for high-codepoint languages, but bloats the size of ascii text.
+utf-8 is great because it's ascii-compatible, but bloats the size of high-codepoint text.
+
+so i came up with an idea i call utf-n: get rid of the concept of bytes and replace it with pairs of bits. a pair of bits can have 4 combinations: 01, 10, 11, and 00. so if we use the first three (01, 10, and 11) to represent a number in ternary (base 3), and we take the last one (00) to represent a separator, then we could encode codepoints in a way that enables us to:
+
+* represent any codepoint without artificial limits,
+* use only the bits we need without padding, and
+* greatly simplify the encoding/decoding mechanism.
+
+it's also neat because it can easily represent negative numbers by shifting to balanced ternary, and has some of the elegance of stop codons and other facets of DNA.
+
+i built this page to test utf-n. change the text in this box to test how each encoding performs. you'll find that while never the best, utf-n is always better than the worst-case scenario. 
+
+any feedback appreciated: @jedschmidt on twitter
+</textarea>
+    <table>
+      <tr>
+        <th></th>
+        <th>bit size</th>
+        <th>byte size</th>
+        <th>perf</th>
+      </tr>
+      <tr>
+        <td>utf-16</td>
+        <td id="utf16bit">0</td>
+        <td id="utf16byte">0</td>
+        <td id="utf16rank">--</td>
+      </tr>
+      <tr>
+        <td>utf-8</td>
+        <td id="utf8bit">0</td>
+        <td id="utf8byte">0</td>
+        <td id="utf8rank">--</td>
+      </tr>
+      <tr>
+        <td>utf-n</td>
+        <td id="utfnbit">0</td>
+        <td id="utfnbyte">0</td>
+        <td id="utfnrank">--</td>
+      </tr>
+    </table>
+    <script>
+    
+      function utf16length( str ) {
+        return str.length * 16;
+      };
+
+      function utf8length( str ) {
+        return encodeURIComponent( str ).replace( /%./g, "" ).length * 8;
+      };
+      
+      function utfnlength( str ) {
+        var ret = 0;
+        
+        for ( var i = 0, l = str.length; i < l; )
+          ret += ( 1 + str.charCodeAt( i++ ).toString( 3 ).length ) * 2;
+
+        return ret;
+      }
+      
+      var
+        textfield = document.getElementById( "text" ),
+        utf8bit = document.getElementById( "utf8bit" ),
+        utf16bit = document.getElementById( "utf16bit" ),
+        utfnbit = document.getElementById( "utfnbit" ),
+
+        utf8byte = document.getElementById( "utf8byte" ),
+        utf16byte = document.getElementById( "utf16byte" ),
+        utfnbyte = document.getElementById( "utfnbyte" ),
+
+        utf8rank = document.getElementById( "utf8rank" ),
+        utf16rank = document.getElementById( "utf16rank" ),
+        utfnrank = document.getElementById( "utfnrank" );
+        
+      textfield.onkeydown = textfield.onkeyup = window.onload = function() {
+        var
+          val = textfield.value,
+          utf8 = utf8length( val ),
+          utf16 = utf16length( val ),
+          utfn = utfnlength( val ),
+          min = Math.min( utf8, utf16, utfn );
+
+        utf8bit.innerHTML = utf8;
+        utf16bit.innerHTML = utf16;
+        utfnbit.innerHTML = utfn;
+
+        utf8byte.innerHTML = utf8 / 8;
+        utf16byte.innerHTML = utf16 / 8;
+        utfnbyte.innerHTML = utfn / 8;
+
+        utf8rank.innerHTML = utf8 == min
+          ? "--"
+          : "+" + Math.floor( 100 * ( utf8 / min - 1 ) ) + "%";
+
+        utf16rank.innerHTML = utf16 == min
+          ? "--"
+          : "+" + Math.floor( 100 * ( utf16 / min - 1 ) ) + "%";
+
+        utfnrank.innerHTML = utfn == min
+          ? "--"
+          : "+" + Math.floor( 100 * ( utfn / min - 1 ) ) + "%";
+          
+      }
+    
+    </script>
+  </body>
+</html>
