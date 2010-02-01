@@ -52,24 +52,28 @@ any feedback appreciated: @jedschmidt on twitter
         <th></th>
         <th>bit size</th>
         <th>byte size</th>
+        <th>bytes/char</th>
         <th>perf</th>
       </tr>
       <tr>
         <td>utf-16</td>
         <td id="utf16bit">0</td>
         <td id="utf16byte">0</td>
+        <td id="utf16per">0</td>
         <td id="utf16rank">--</td>
       </tr>
       <tr>
         <td>utf-8</td>
         <td id="utf8bit">0</td>
         <td id="utf8byte">0</td>
+        <td id="utf8per">0</td>
         <td id="utf8rank">--</td>
       </tr>
       <tr>
         <td>utf-n</td>
         <td id="utfnbit">0</td>
         <td id="utfnbyte">0</td>
+        <td id="utfnper">0</td>
         <td id="utfnrank">--</td>
       </tr>
     </table>
@@ -102,6 +106,10 @@ any feedback appreciated: @jedschmidt on twitter
         utf16byte = document.getElementById( "utf16byte" ),
         utfnbyte = document.getElementById( "utfnbyte" ),
 
+        utf8per = document.getElementById( "utf8per" ),
+        utf16per = document.getElementById( "utf16per" ),
+        utfnper = document.getElementById( "utfnper" ),
+
         utf8rank = document.getElementById( "utf8rank" ),
         utf16rank = document.getElementById( "utf16rank" ),
         utfnrank = document.getElementById( "utfnrank" );
@@ -109,6 +117,7 @@ any feedback appreciated: @jedschmidt on twitter
       textfield.onkeydown = textfield.onkeyup = window.onload = function() {
         var
           val = textfield.value,
+          len = val.length,
           utf8 = utf8length( val ),
           utf16 = utf16length( val ),
           utfn = utfnlength( val ),
@@ -121,6 +130,10 @@ any feedback appreciated: @jedschmidt on twitter
         utf8byte.innerHTML = utf8 / 8;
         utf16byte.innerHTML = utf16 / 8;
         utfnbyte.innerHTML = utfn / 8;
+
+        utf8per.innerHTML = Math.round( ( 100 * utf8 ) / ( len * 8 ) ) / 100;
+        utf16per.innerHTML = Math.round( ( 100 * utf16 ) / ( len * 8 ) ) / 100;
+        utfnper.innerHTML = Math.round( ( 100 * utfn ) / ( len * 8 ) ) / 100;
 
         utf8rank.innerHTML = utf8 == min
           ? "--"
